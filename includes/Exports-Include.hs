@@ -77,4 +77,6 @@ setTitleCode,
 
 -- * Utilities
 hSupportsANSI,
-cursorPosition
+getReportedCursorPosition,
+cursorPosition,
+getCursorPosition

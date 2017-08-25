@@ -61,7 +61,8 @@ restoreCursor :: IO ()
 -- being recognised on the output stream, as:
 -- @ESC [ \<cursor row> ; \<cursor column> R@
 --
--- This function may be of limited use on Windows operating systems because of
+-- In isolation of 'getReportedCursorPosition' or 'getCursorPosition', this
+-- function may be of limited use on Windows operating systems because of
 -- difficulties in obtaining the data emitted into the console input stream.
 -- The function 'hGetBufNonBlocking' in module "System.IO" does not work on
 -- Windows. This has been attributed to the lack of non-blocking primatives in
@@ -127,3 +128,25 @@ cursorPosition = do
   where
     digit = satisfy isDigit
     decimal = many1 digit
+
+-- | Attempts to get the reported cursor position data from the console input
+-- stream. The function is intended to be called immediately after
+-- 'reportCursorPosition' (or related functions) have caused characters to be
+-- emitted into the stream.
+--
+-- For example, on a Unix-like operating system:
+--
+-- > hSetBuffering stdin NoBuffering -- set no buffering (the contents of the
+-- >                                 -- buffer will be discarded, so this needs
+-- >                                 -- to be done before the cursor positon is
+-- >                                 -- emitted)
+-- > reportCursorPosition
+-- > hFlush stdout -- ensure the report cursor position code is sent to the
+-- >               -- operating system
+-- > input <- getReportedCursorPosition
+--
+getReportedCursorPosition :: IO String
+
+-- | Attempts to get the reported cursor position, combining the functions
+-- 'reportCursorPosition', 'getReportedCursorPosition' and 'cursorPosition'.
+getCursorPosition :: IO (Maybe (Int, Int))
