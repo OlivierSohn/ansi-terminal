@@ -75,8 +75,9 @@ setTitle,
 hSetTitle,
 setTitleCode,
 
--- * Utilities
+-- * Checking if handle supports ANSI
 hSupportsANSI,
+-- * Getting the cursor position
+getCursorPosition,
 getReportedCursorPosition,
-cursorPosition,
-getCursorPosition
+cursorPosition

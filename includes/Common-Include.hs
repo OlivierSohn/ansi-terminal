@@ -57,7 +57,10 @@ saveCursor :: IO ()
 -- | Restore the cursor position from memory. There will be no value saved in
 -- memory until the first use of the 'saveCursor' command.
 restoreCursor :: IO ()
--- | Emit the cursor position into the console input stream, immediately after
+-- | Looking for a way to get the cursors position? See
+-- 'getCursorPosition'.
+--
+-- Emit the cursor position into the console input stream, immediately after
 -- being recognised on the output stream, as:
 -- @ESC [ \<cursor row> ; \<cursor column> R@
 --
