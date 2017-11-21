@@ -60,7 +60,7 @@ module System.Console.ANSI.Codes
   , setTitleCode
 
     -- * Utilities
-  , colorToCode, csi, sgrToCode
+  , colorToCode, color8ToCode, csi, sgrToCode
   ) where
 
 import Data.List (intersperse)
@@ -68,6 +68,8 @@ import Data.List (intersperse)
 import Data.Colour.SRGB (toSRGB24, RGB (..))
 
 import System.Console.ANSI.Types
+
+import System.Console.ANSI.Color (clamp)
 
 -- | 'csi' @parameters controlFunction@, where @parameters@ is a list of 'Int',
 -- returns the control sequence comprising the control function CONTROL
@@ -91,6 +93,17 @@ colorToCode color = case color of
   Magenta -> 5
   Cyan    -> 6
   White   -> 7
+
+
+-- | 'color8ToCode' @color@ returns the index of the color
+color8ToCode :: Color8 -> Color8Code
+color8ToCode (Gray8Color g)       = Color8Code $ 232 + clamp g 0 23
+color8ToCode (RGB8Color r' g' b') = Color8Code $ 16 + 36 * r + 6 * g + b
+  where
+    clamp' x = clamp x 0 5
+    r = clamp' r'
+    g = clamp' g'
+    b = clamp' b'
 
 -- | 'sgrToCode' @sgr@ returns the parameter of the SELECT GRAPHIC RENDITION
 -- (SGR) aspect identified by @sgr@.
@@ -120,11 +133,16 @@ sgrToCode sgr = case sgr of
   SetColor Foreground Vivid color -> [90 + colorToCode color]
   SetColor Background Dull color  -> [40 + colorToCode color]
   SetColor Background Vivid color -> [100 + colorToCode color]
+  SetColor8Code layer (Color8Code code) -> [38 + layerOffset layer, 5, code]
+  SetColor8 layer color -> sgrToCode $ SetColor8Code layer $ color8ToCode color
   SetRGBColor Foreground color -> [38, 2] ++ toRGB color
   SetRGBColor Background color -> [48, 2] ++ toRGB color
  where
   toRGB color = let RGB r g b = toSRGB24 color
                 in  map fromIntegral [r, g, b]
+  layerOffset l = case l of
+    Foreground -> 0
+    Background -> 10
 
 cursorUpCode, cursorDownCode, cursorForwardCode, cursorBackwardCode
   :: Int -- ^ Number of lines or characters to move
