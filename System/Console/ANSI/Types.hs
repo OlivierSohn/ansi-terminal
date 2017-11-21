@@ -3,6 +3,8 @@ module System.Console.ANSI.Types
   (
     SGR (..)
   , ConsoleLayer (..)
+  -- | ANSI colors come in different flavors (3/4 bits, 8bits, 24 bits) :
+  --   https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
   , Color (..)
   , RGB8Color(..)
   , Gray8Color(..)
@@ -18,7 +20,7 @@ import Data.Ix (Ix)
 
 import Data.Colour (Colour)
 
--- | ANSI 8-bit "candy" colors: come in various intensities, which are controlled by
+-- | ANSI 3/4-bit "candy" colors: come in various intensities, which are controlled by
 -- 'ColorIntensity'
 data Color = Black
            | Red
@@ -30,7 +32,7 @@ data Color = Black
            | White
            deriving (Eq, Ord, Bounded, Enum, Show, Read, Ix)
 
--- | ANSI 8-bit "candy" colors come in two intensities
+-- | ANSI 3/4-bit "candy" colors come in two intensities
 data ColorIntensity = Dull
                     | Vivid
                     deriving (Eq, Ord, Bounded, Enum, Show, Read, Ix)
