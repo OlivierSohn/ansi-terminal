@@ -63,6 +63,8 @@ module System.Console.ANSI.Codes
   , colorToCode, csi, sgrToCode
   ) where
 
+import Data.Int(Int8)
+
 import Data.List (intersperse)
 
 import Data.Colour.SRGB (toSRGB24, RGB (..))
@@ -92,6 +94,38 @@ colorToCode color = case color of
   Cyan    -> 6
   White   -> 7
 
+-- | 'grayscaleColorToCode' @color@ returns the 232-based index of the color (one of the
+-- 24 grayscale colors in the standard).
+-- If the color component is not in the range [0..23], it is clamped.
+grayColorToCode :: Gray8Color -> Int
+grayColorToCode (Gray8Color g) = 232 + clamp (fromIntegral g) 0 23
+
+-- | 'rgbColorToCode' @color@ returns the 16-based index of the color (one of the
+-- 216 colors of the 6 x 6 x 6 cube in the standard).
+-- If one color component is not in the range [0..5], it is clamped.
+rgbColorToCode :: RGB8Color -> Int
+rgbColorToCode (RGB8Color r' g' b') = 16 + 36 * r + 6 * g + b
+  where
+    convert :: Int8 -> Int
+    convert x = clamp (fromIntegral x) 0 5
+    r = convert r'
+    g = convert g'
+    b = convert b'
+
+-- clamps a number to a range.
+clamp :: Num a => Ord a =>
+         a
+      -- ^ the value
+      -> a
+      -- ^ the inclusive minimum bound
+      -> a
+      -- ^ the inclusive maximum bound
+      -> a
+clamp n min_ max_
+  | n < min_ = min_
+  | n > max_ = max_
+  | otherwise = n
+
 -- | 'sgrToCode' @sgr@ returns the parameter of the SELECT GRAPHIC RENDITION
 -- (SGR) aspect identified by @sgr@.
 sgrToCode :: SGR -- ^ The SGR aspect
@@ -120,6 +154,10 @@ sgrToCode sgr = case sgr of
   SetColor Foreground Vivid color -> [90 + colorToCode color]
   SetColor Background Dull color  -> [40 + colorToCode color]
   SetColor Background Vivid color -> [100 + colorToCode color]
+  SetRGB8Color Foreground color   -> [38, 5, rgbColorToCode color]
+  SetRGB8Color Background color   -> [48, 5, rgbColorToCode color]
+  SetGray8Color Foreground color  -> [38, 5, grayColorToCode color]
+  SetGray8Color Background color  -> [48, 5, grayColorToCode color]
   SetRGBColor Foreground color -> [38, 2] ++ toRGB color
   SetRGBColor Background color -> [48, 2] ++ toRGB color
  where

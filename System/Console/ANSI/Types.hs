@@ -4,17 +4,21 @@ module System.Console.ANSI.Types
     SGR (..)
   , ConsoleLayer (..)
   , Color (..)
+  , RGB8Color(..)
+  , Gray8Color(..)
   , ColorIntensity (..)
   , ConsoleIntensity (..)
   , Underlining (..)
   , BlinkSpeed (..)
   ) where
 
+import Data.Int (Int8)
+
 import Data.Ix (Ix)
 
 import Data.Colour (Colour)
 
--- | ANSI colors: come in various intensities, which are controlled by
+-- | ANSI 8-bit "candy" colors: come in various intensities, which are controlled by
 -- 'ColorIntensity'
 data Color = Black
            | Red
@@ -26,10 +30,23 @@ data Color = Black
            | White
            deriving (Eq, Ord, Bounded, Enum, Show, Read, Ix)
 
--- | ANSI colors come in two intensities
+-- | ANSI 8-bit "candy" colors come in two intensities
 data ColorIntensity = Dull
                     | Vivid
                     deriving (Eq, Ord, Bounded, Enum, Show, Read, Ix)
+
+
+-- | ANSI 8-bit "6 × 6 × 6 cube" rgb colors (216 colors). Each individual vomponent values is in range [0..5].
+data RGB8Color = RGB8Color {
+    _rgb8ColorRed :: !Int8
+  , _rgb8ColorGreen :: !Int8
+  , _rgb8ColorBlue :: !Int8
+  } deriving (Eq, Show, Read)
+
+-- | ANSI 8-bit "grayscale" colors. Gray component values are in range [0..5].
+data Gray8Color = Gray8Color {
+    _gray8ColorGray :: !Int8
+  } deriving (Eq, Show, Read)
 
 -- | ANSI colors can be set on two different layers
 data ConsoleLayer = Foreground
@@ -66,6 +83,8 @@ data SGR = Reset
          | SetVisible Bool -- ^ Not widely supported
          | SetSwapForegroundBackground Bool
          | SetColor ConsoleLayer ColorIntensity Color
+         | SetRGB8Color ConsoleLayer RGB8Color
+         | SetGray8Color ConsoleLayer Gray8Color
          | SetRGBColor ConsoleLayer (Colour Float) -- ^ Supported from Windows 10
                                                    -- Creators Update
          deriving (Eq, Show, Read)
