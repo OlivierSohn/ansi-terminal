@@ -14,8 +14,6 @@ module System.Console.ANSI.Types
   , BlinkSpeed (..)
   ) where
 
-import Data.Int (Int8)
-
 import Data.Ix (Ix)
 
 import Data.Colour (Colour)
@@ -41,14 +39,14 @@ data ColorIntensity = Dull
 -- | ANSI 8-bit "6 × 6 × 6 cube" rgb colors (216 colors). Each individual
 --  component value is in range [0..5].
 data RGB8Color = RGB8Color {
-    _rgb8ColorRed :: !Int8
-  , _rgb8ColorGreen :: !Int8
-  , _rgb8ColorBlue :: !Int8
+    _rgb8ColorRed :: !Int
+  , _rgb8ColorGreen :: !Int
+  , _rgb8ColorBlue :: !Int
   } deriving (Eq, Show, Read)
 
 -- | ANSI 8-bit "grayscale" colors. Gray component values are in range [0..5].
 data Gray8Color = Gray8Color {
-    _gray8ColorGray :: !Int8
+    _gray8ColorGray :: !Int
   } deriving (Eq, Show, Read)
 
 -- | ANSI colors can be set on two different layers

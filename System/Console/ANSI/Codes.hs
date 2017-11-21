@@ -63,8 +63,6 @@ module System.Console.ANSI.Codes
   , colorToCode, csi, sgrToCode
   ) where
 
-import Data.Int(Int8)
-
 import Data.List (intersperse)
 
 import Data.Colour.SRGB (toSRGB24, RGB (..))
@@ -98,7 +96,7 @@ colorToCode color = case color of
 -- 24 grayscale colors in the standard).
 -- If the color component is not in the range [0..23], it is clamped.
 grayColorToCode :: Gray8Color -> Int
-grayColorToCode (Gray8Color g) = 232 + clamp (fromIntegral g) 0 23
+grayColorToCode (Gray8Color g) = 232 + clamp g 0 23
 
 -- | 'rgbColorToCode' @color@ returns the 16-based index of the color (one of the
 -- 216 colors of the 6 x 6 x 6 cube in the standard).
@@ -106,11 +104,10 @@ grayColorToCode (Gray8Color g) = 232 + clamp (fromIntegral g) 0 23
 rgbColorToCode :: RGB8Color -> Int
 rgbColorToCode (RGB8Color r' g' b') = 16 + 36 * r + 6 * g + b
   where
-    convert :: Int8 -> Int
-    convert x = clamp (fromIntegral x) 0 5
-    r = convert r'
-    g = convert g'
-    b = convert b'
+    clamp' x = clamp x 0 5
+    r = clamp' r'
+    g = clamp' g'
+    b = clamp' b'
 
 -- clamps a number to a range.
 clamp :: Num a => Ord a =>
