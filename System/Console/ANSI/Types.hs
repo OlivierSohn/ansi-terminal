@@ -6,9 +6,10 @@ module System.Console.ANSI.Types
   -- | ANSI colors come in different flavors (3/4 bits, 8bits, 24 bits) :
   --   https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
   , Color (..)
+  , ColorIntensity (..)
+  , Raw8Color(..)
   , RGB8Color(..)
   , Gray8Color(..)
-  , ColorIntensity (..)
   , ConsoleIntensity (..)
   , Underlining (..)
   , BlinkSpeed (..)
@@ -35,6 +36,9 @@ data ColorIntensity = Dull
                     | Vivid
                     deriving (Eq, Ord, Bounded, Enum, Show, Read, Ix)
 
+
+-- | ANSI 8 bit color, defined by its code in [0..255]
+newtype Raw8Color = Raw8Color Int deriving (Eq, Ord, Show, Read)
 
 -- | ANSI 8-bit "6 × 6 × 6 cube" rgb colors (216 colors). Each individual
 --  component value is in range [0..5].
@@ -84,6 +88,7 @@ data SGR = Reset
          | SetVisible Bool -- ^ Not widely supported
          | SetSwapForegroundBackground Bool
          | SetColor ConsoleLayer ColorIntensity Color
+         | SetRaw8Color ConsoleLayer Raw8Color
          | SetRGB8Color ConsoleLayer RGB8Color
          | SetGray8Color ConsoleLayer Gray8Color
          | SetRGBColor ConsoleLayer (Colour Float) -- ^ Supported from Windows 10

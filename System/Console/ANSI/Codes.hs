@@ -151,6 +151,8 @@ sgrToCode sgr = case sgr of
   SetColor Foreground Vivid color -> [90 + colorToCode color]
   SetColor Background Dull color  -> [40 + colorToCode color]
   SetColor Background Vivid color -> [100 + colorToCode color]
+  SetRaw8Color Foreground (Raw8Color color) -> [38, 5, clamp color 0 255]
+  SetRaw8Color Background (Raw8Color color) -> [48, 5, clamp color 0 255]
   SetRGB8Color Foreground color   -> [38, 5, rgbColorToCode color]
   SetRGB8Color Background color   -> [48, 5, rgbColorToCode color]
   SetGray8Color Foreground color  -> [38, 5, grayColorToCode color]
