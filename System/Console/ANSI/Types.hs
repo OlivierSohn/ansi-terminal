@@ -36,7 +36,8 @@ data ColorIntensity = Dull
                     deriving (Eq, Ord, Bounded, Enum, Show, Read, Ix)
 
 
--- | ANSI 8-bit "6 × 6 × 6 cube" rgb colors (216 colors). Each individual vomponent values is in range [0..5].
+-- | ANSI 8-bit "6 × 6 × 6 cube" rgb colors (216 colors). Each individual
+--  component value is in range [0..5].
 data RGB8Color = RGB8Color {
     _rgb8ColorRed :: !Int8
   , _rgb8ColorGreen :: !Int8
