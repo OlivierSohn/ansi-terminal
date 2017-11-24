@@ -42,7 +42,6 @@ color8To24 (Gray8Color g') =
   in  SRGBLin.rgb g g g
 
 -- | how xterm interprets 8bit rgb colors (deduced from https://jonasjacek.github.io/colors/)
-{-# INLINE xtermMapRGB8bitComponent #-}
 xtermMapRGB8bitComponent :: Int
                          -- ^ input values are in range [0..5]
                          -- (the admissible range for rgb components of 8bit rgb ANSI colors, cf.
@@ -53,7 +52,6 @@ xtermMapRGB8bitComponent 0 = 0
 xtermMapRGB8bitComponent n = 55 + n * 40
 
 -- | how xterm interprets 8bit grayscale colors (deduced from https://jonasjacek.github.io/colors/)
-{-# INLINE xtermMapGray8bitComponent #-}
 xtermMapGray8bitComponent :: Int
                          -- ^ input values are in range [0..23]
                          -- (the admissible range for gray component of 8bit grayscale ANSI colors, cf.
@@ -62,7 +60,6 @@ xtermMapGray8bitComponent :: Int
                           -- ^ output is in range [0..255]
 xtermMapGray8bitComponent v = 8 + 10 * v
 
-{-# INLINE clamp #-}
 -- | clamps a number to a range.
 clamp :: Num a => Ord a =>
          a
