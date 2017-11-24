@@ -95,9 +95,14 @@ colorToCode color = case color of
   White   -> 7
 
 
--- | 'color8ToCode' @color@ returns the index of the color
+-- | Color8 represents an 8-bit ANSI color. This function converts it to the
+-- corresponding code, defined by https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+--
+-- For safety the values of Color8 are clamped in their respective ranges.
 color8ToCode :: Color8 -> Color8Code
+-- 8-bit grayscale colors are represented by code: 232 + g (g in [0..23]) (see link to spec above)
 color8ToCode (Gray8Color g)       = Color8Code $ 232 + clamp g 0 23
+-- 8-bit rgb colors are represented by code: 16 + 36 × r + 6 × g + b (0 ≤ r, g, b ≤ 5) (see link to spec above)
 color8ToCode (RGB8Color r' g' b') = Color8Code $ 16 + 36 * r + 6 * g + b
   where
     clamp' x = clamp x 0 5

@@ -18,7 +18,7 @@ import Data.Ix (Ix)
 
 import Data.Colour (Colour)
 
--- | ANSI 3/4-bit "candy" colors: come in various intensities, which are controlled by
+-- | ANSI 4-bit colors: come in various intensities, which are controlled by
 -- 'ColorIntensity'
 data Color = Black
            | Red
@@ -30,7 +30,7 @@ data Color = Black
            | White
            deriving (Eq, Ord, Bounded, Enum, Show, Read, Ix)
 
--- | ANSI 3/4-bit "candy" colors come in two intensities
+-- | ANSI 4-bit colors come in two intensities
 data ColorIntensity = Dull
                     | Vivid
                     deriving (Eq, Ord, Bounded, Enum, Show, Read, Ix)
@@ -38,6 +38,19 @@ data ColorIntensity = Dull
 
 newtype Color8Code = Color8Code Int deriving (Eq, Show, Read)
 
+-- | Represents 8-bit ANSI colors whose codes are in the range 0x10 - 0xFF.
+--
+--  For reference, here are all ranges of 80bit ANSI colors as defined in
+--  https://en.wikipedia.org/wiki/ANSI_escape_code#Colors lists the ranges:
+--
+-- 0x00-0x07:  standard colors (as in ESC [ 30–37 m)
+-- 0x08-0x0F:  high intensity colors (as in ESC [ 90–97 m)
+-- 0x10-0xE7:  6 × 6 × 6 cube (216 colors): 16 + 36 × r + 6 × g + b (0 ≤ r, g, b ≤ 5)
+-- 0xE8-0xFF:  grayscale from black to white in 24 steps
+--
+--  The 8-bit ANSI colors whose codes are in the 0x00-0x0F range are equivalent to the
+--  ANSI 4-bit colors, hence they are represented by the pair (ColorIntensity, Color)
+--
 data Color8 = RGB8Color !Int !Int !Int -- ^ ANSI 8-bit "6 × 6 × 6 cube" (216 colors) rgb.
                                        --   r,g,b components are in range [0..5].
             | Gray8Color !Int          -- ^ ANSI 8-bit "grayscale" colors.
