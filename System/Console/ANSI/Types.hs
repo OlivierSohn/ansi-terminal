@@ -40,7 +40,7 @@ newtype Color8Code = Color8Code Int deriving (Eq, Show, Read)
 
 -- | Represents 8-bit ANSI colors whose codes are in the range 0x10 - 0xFF.
 --
---  For reference, here are all ranges of 80bit ANSI colors as defined in
+--  For reference, here are all ranges of 8-bit ANSI colors as defined in
 --  https://en.wikipedia.org/wiki/ANSI_escape_code#Colors lists the ranges:
 --
 -- 0x00-0x07:  standard colors (as in ESC [ 30–37 m)
@@ -49,7 +49,8 @@ newtype Color8Code = Color8Code Int deriving (Eq, Show, Read)
 -- 0xE8-0xFF:  grayscale from black to white in 24 steps
 --
 --  The 8-bit ANSI colors whose codes are in the 0x00-0x0F range are equivalent to the
---  ANSI 4-bit colors, hence they are represented by the pair (ColorIntensity, Color)
+--  ANSI 4-bit colors, hence they are not represented by Color8, but by
+--  the pair (ColorIntensity, Color).
 --
 data Color8 = RGB8Color !Int !Int !Int -- ^ ANSI 8-bit "6 × 6 × 6 cube" (216 colors) rgb.
                                        --   r,g,b components are in range [0..5].
