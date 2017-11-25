@@ -18,6 +18,8 @@ import Data.Ix (Ix)
 
 import Data.Colour (Colour)
 
+import Data.Word (Word8)
+
 -- | ANSI 4-bit colors: come in various intensities, which are controlled by
 -- 'ColorIntensity'
 data Color = Black
@@ -36,7 +38,7 @@ data ColorIntensity = Dull
                     deriving (Eq, Ord, Bounded, Enum, Show, Read, Ix)
 
 
-newtype Color8Code = Color8Code Int deriving (Eq, Show, Read)
+newtype Color8Code = Color8Code Word8 deriving (Eq, Show, Read)
 
 -- | Represents 8-bit ANSI colors whose codes are in the range 0x10 - 0xFF.
 --
@@ -52,9 +54,9 @@ newtype Color8Code = Color8Code Int deriving (Eq, Show, Read)
 --  ANSI 4-bit colors, hence they are not represented by Color8, but by
 --  the pair (ColorIntensity, Color).
 --
-data Color8 = RGB8Color !Int !Int !Int -- ^ ANSI 8-bit "6 × 6 × 6 cube" (216 colors) rgb.
+data Color8 = RGB8Color !Word8 !Word8 !Word8 -- ^ ANSI 8-bit "6 × 6 × 6 cube" (216 colors) rgb.
                                        --   r,g,b components are in range [0..5].
-            | Gray8Color !Int          -- ^ ANSI 8-bit "grayscale" colors.
+            | Gray8Color !Word8          -- ^ ANSI 8-bit "grayscale" colors.
                                        --   gray component is in range [0..23].
             deriving (Eq, Show, Read)
 

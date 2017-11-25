@@ -13,6 +13,7 @@ module System.Console.ANSI.Color
 import qualified Data.Colour.SRGB.Linear as SRGBLin(rgb, Colour)
 import qualified Data.Colour.SRGB as SRGB (RGB (..), toSRGB, Colour)
 
+import Data.Word (Word8)
 import Data.Colour.Names (black, blue, cyan, green, grey, lime, magenta, maroon,
                           navy, olive, purple, red, silver, teal, white, yellow)
 
@@ -31,32 +32,32 @@ import System.Console.ANSI.Types
 -- in linear srgb colorspace (we divide by 255 to express the value as a floating point in range [0 1]).
 color8To24 :: Color8 -> SRGBLin.Colour Float
 color8To24 (RGB8Color r' g' b') =
-  let mapping = (\v -> v/255.0) . fromIntegral . xtermMapRGB8bitComponent . (\v -> clamp v 0 5) :: Int -> Float
+  let mapping = (\v -> v/255.0) . fromIntegral . xtermMapRGB8bitComponent . (\v -> clamp v 0 5) :: Word8 -> Float
       r = mapping r'
       g = mapping g'
       b = mapping b'
   in  SRGBLin.rgb r g b
 color8To24 (Gray8Color g') =
-  let mapping = (\v -> v/255.0) . fromIntegral . xtermMapGray8bitComponent . (\v -> clamp v 0 23) :: Int -> Float
+  let mapping = (\v -> v/255.0) . fromIntegral . xtermMapGray8bitComponent . (\v -> clamp v 0 23) :: Word8 -> Float
       g = mapping g'
   in  SRGBLin.rgb g g g
 
 -- | how xterm interprets 8bit rgb colors (deduced from https://jonasjacek.github.io/colors/)
-xtermMapRGB8bitComponent :: Int
+xtermMapRGB8bitComponent :: Word8
                          -- ^ input values are in range [0..5]
                          -- (the admissible range for rgb components of 8bit rgb ANSI colors, cf.
                          -- https://en.wikipedia.org/wiki/ANSI_escape_code#Colors)
-                         -> Int
+                         -> Word8
                          -- ^ output is in range [0..255]
 xtermMapRGB8bitComponent 0 = 0
 xtermMapRGB8bitComponent n = 55 + n * 40
 
 -- | how xterm interprets 8bit grayscale colors (deduced from https://jonasjacek.github.io/colors/)
-xtermMapGray8bitComponent :: Int
+xtermMapGray8bitComponent :: Word8
                          -- ^ input values are in range [0..23]
                          -- (the admissible range for gray component of 8bit grayscale ANSI colors, cf.
                          -- https://en.wikipedia.org/wiki/ANSI_escape_code#Colors)
-                          -> Int
+                          -> Word8
                           -- ^ output is in range [0..255]
 xtermMapGray8bitComponent v = 8 + 10 * v
 
@@ -89,11 +90,9 @@ clamp n min_ max_
 color8CodeToEither :: Color8Code
                    -> Either (ColorIntensity, Color) Color8
 color8CodeToEither (Color8Code c)
-  | c < 0  = error $ "negative color8 code is invalid: " ++ show c
-  | c < 16 = Left $ fst $ aNSIColors !! c   -- interpreted as a 4-bit ANSI color
-  | c < 232 = Right $ asRGB (c-16)          -- interpreted as 8-bit rgb
-  | c < 256 = Right $ Gray8Color (c-232)    -- interpreted as 8-bit grayscale
-  | otherwise = error $ "color8 code overflow :" ++ show c
+  | c < 16    = Left $ fst $ aNSIColors !! fromIntegral c   -- interpreted as a 4-bit ANSI color
+  | c < 232   = Right $ asRGB (c-16)          -- interpreted as 8-bit rgb
+  | otherwise = Right $ Gray8Color (c-232)    -- interpreted as 8-bit grayscale
  where
   asRGB i = let -- we know that i = 36 × r + 6 × g + b and (0 ≤ r, g, b ≤ 5) (cf. comment on top)
                 -- so we can deduce the unique set of corresponding r g and b values:
