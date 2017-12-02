@@ -16,11 +16,8 @@ import System.IO (Handle, hFlush, hIsTerminalDevice, stdin, stdout)
 import System.IO.Unsafe (unsafePerformIO)
 import Text.ParserCombinators.ReadP (readP_to_S)
 
-import Data.Either(either)
-
-import System.Console.ANSI.Types
 import System.Console.ANSI.Color
-import System.Console.ANSI.Codes (color8ToCode)
+import System.Console.ANSI.Types
 import qualified System.Console.ANSI.Unix as Unix
 import System.Console.ANSI.Windows.Detect
 import System.Console.ANSI.Windows.Emulator.Codes
@@ -293,9 +290,9 @@ applyANSISGRToAttribute def sgr attribute = case sgr of
     (attribute .&. (complement bACKGROUND_INTENSITY))
   SetColor Background Vivid color -> applyBackgroundANSIColorToAttribute color
     (attribute .|. bACKGROUND_INTENSITY)
-  SetColor8 layer color -> applyANSISGRToAttribute def (SetColor8Code layer $ color8ToCode color) attribute
-  SetColor8Code layer code -> let (intensity, col) = approximateColor8Code code
-                              in  applyANSISGRToAttribute def (SetColor layer intensity col) attribute
+  SetPaletteColor layer code ->
+    let (intensity, col) = approximateColor8Code code
+    in  applyANSISGRToAttribute def (SetColor layer intensity col) attribute
   SetRGBColor Foreground color ->
     let (colorIntensity, aNSIColor) = closest4bitsANSIColor color
         attribute' = case colorIntensity of
@@ -312,9 +309,8 @@ applyANSISGRToAttribute def sgr attribute = case sgr of
   iNTENSITY = fOREGROUND_INTENSITY
 
 approximateColor8Code :: Color8Code -> (ColorIntensity, Color)
-approximateColor8Code code@(Color8Code c)
-  | c < 0 || c > 255 = (Vivid, Red) -- safe fallback to avoid interrupting the program with error
-  | otherwise        = either (id) (closest4bitsANSIColor . color8To24) $ color8CodeToEither code
+approximateColor8Code code
+  = closest4bitsANSIColor $ xterm256ToSRGB $ color8CodeToXterm256 code
 
 hSetSGR cds h sgr
   = emulatorFallback (Unix.hSetSGR h sgr) $ withHandle h $ \handle -> do

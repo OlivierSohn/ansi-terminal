@@ -60,16 +60,19 @@ module System.Console.ANSI.Codes
   , setTitleCode
 
     -- * Utilities
-  , colorToCode, color8ToCode, csi, sgrToCode
+  , colorToCode
+  , color8CodeToXterm256
+  , xterm256ColorToCode
+  , closestXterm256Color
+  , csi
+  , sgrToCode
   ) where
 
+import Data.Colour.SRGB (toSRGB24, RGB (..))
 import Data.List (intersperse)
 
-import Data.Colour.SRGB (toSRGB24, RGB (..))
-
+import System.Console.ANSI.Color
 import System.Console.ANSI.Types
-
-import System.Console.ANSI.Color (clamp)
 
 -- | 'csi' @parameters controlFunction@, where @parameters@ is a list of 'Int',
 -- returns the control sequence comprising the control function CONTROL
@@ -81,34 +84,10 @@ csi :: [Int]  -- ^ List of parameters for the control sequence
     -> String
 csi args code = "\ESC[" ++ concat (intersperse ";" (map show args)) ++ code
 
--- | 'colorToCode' @color@ returns the 0-based index of the color (one of the
--- eight colors in the standard).
-colorToCode :: Color -> Int
-colorToCode color = case color of
-  Black   -> 0
-  Red     -> 1
-  Green   -> 2
-  Yellow  -> 3
-  Blue    -> 4
-  Magenta -> 5
-  Cyan    -> 6
-  White   -> 7
-
-
--- | Color8 represents an 8-bit ANSI color. This function converts it to the
--- corresponding code, defined by https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
---
--- For safety the values of Color8 are clamped in their respective ranges.
-color8ToCode :: Color8 -> Color8Code
--- 8-bit grayscale colors are represented by code: 232 + g (g in [0..23]) (see link to spec above)
-color8ToCode (Gray8Color g)       = Color8Code $ 232 + clamp g 0 23
--- 8-bit rgb colors are represented by code: 16 + 36 × r + 6 × g + b (0 ≤ r, g, b ≤ 5) (see link to spec above)
-color8ToCode (RGB8Color r' g' b') = Color8Code $ 16 + 36 * r + 6 * g + b
-  where
-    clamp' x = clamp x 0 5
-    r = clamp' r'
-    g = clamp' g'
-    b = clamp' b'
+-- | Color8Code represents an 8-bit ANSI palette color. This function converts
+-- it to the corresponding code
+color8CodeToCode :: Color8Code -> Int
+color8CodeToCode (Color8Code color) = fromIntegral color
 
 -- | 'sgrToCode' @sgr@ returns the parameter of the SELECT GRAPHIC RENDITION
 -- (SGR) aspect identified by @sgr@.
@@ -138,16 +117,13 @@ sgrToCode sgr = case sgr of
   SetColor Foreground Vivid color -> [90 + colorToCode color]
   SetColor Background Dull color  -> [40 + colorToCode color]
   SetColor Background Vivid color -> [100 + colorToCode color]
-  SetColor8Code layer (Color8Code code) -> [38 + layerOffset layer, 5, fromIntegral code]
-  SetColor8 layer color -> sgrToCode $ SetColor8Code layer $ color8ToCode color
+  SetPaletteColor Foreground colorCode -> [38, 5, color8CodeToCode colorCode]
+  SetPaletteColor Background colorCode -> [48, 5, color8CodeToCode colorCode]
   SetRGBColor Foreground color -> [38, 2] ++ toRGB color
   SetRGBColor Background color -> [48, 2] ++ toRGB color
  where
   toRGB color = let RGB r g b = toSRGB24 color
                 in  map fromIntegral [r, g, b]
-  layerOffset l = case l of
-    Foreground -> 0
-    Background -> 10
 
 cursorUpCode, cursorDownCode, cursorForwardCode, cursorBackwardCode
   :: Int -- ^ Number of lines or characters to move
